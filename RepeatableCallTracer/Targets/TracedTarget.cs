@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 
 using RepeatableCallTracer.Common;
+using RepeatableCallTracer.Dependencies;
 
 namespace RepeatableCallTracer.Targets
 {
@@ -13,6 +14,20 @@ namespace RepeatableCallTracer.Targets
     {
         private readonly CallTracerSerializer serializer = new(options);
         private readonly CallTracerValidator validator = new(options);
+
+        public TracedTarget(
+            TTarget target,
+            ICallTraceWriter traceWriter,
+            IDebugCallTraceProvider debugTraceProvider,
+            CallTracerOptions options)
+            : this(
+                  target,
+                  new ReflectionBasedTracedDependenciesProvider(options),
+                  traceWriter,
+                  debugTraceProvider,
+                  options)
+        {
+        }
 
         protected TTarget Target { get; } = target;
 
