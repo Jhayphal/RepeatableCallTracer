@@ -2,28 +2,35 @@
 
 namespace RepeatableCallTracer.Targets
 {
-    internal sealed class TracedTargetCallScope(
-        CallTrace trace,
-        CallTracerOptions options,
-        IReadOnlyDictionary<string, Type> expectedParameters,
-        IEnumerable<ITracedDependencyOperation> operations,
-        ICallTraceWriter traceWriter) : ITracedTargetOperation
+    internal sealed class TracedTargetCallScope : ITracedTargetOperation
     {
-        private readonly CallTrace trace = trace;
-        private readonly CallTracerOptions options = options;
-        private readonly IReadOnlyDictionary<string, Type> expectedParameters = expectedParameters;
-        private readonly IEnumerable<ITracedDependencyOperation> operations = operations;
-        private readonly ICallTraceWriter traceWriter = traceWriter;
+        private readonly CallTrace trace;
+        private readonly CallTracerOptions options;
+        private readonly IReadOnlyDictionary<string, Type> expectedParameters;
+        private readonly IEnumerable<ITracedOperation> operations;
+        private readonly ICallTraceWriter traceWriter;
 
-        private readonly CallTracerSerializer serializer = new(options);
+        private readonly CallTracerSerializer serializer;
 
         private readonly Dictionary<string, Type> actualParameters = [];
 
-        public void BeginOperation()
+        public TracedTargetCallScope(
+            CallTrace trace,
+            CallTracerOptions options,
+            IReadOnlyDictionary<string, Type> expectedParameters,
+            IEnumerable<ITracedOperation> operations,
+            ICallTraceWriter traceWriter)
         {
+            this.trace = trace;
+            this.options = options;
+            this.expectedParameters = expectedParameters;
+            this.operations = operations;
+            this.traceWriter = traceWriter;
+            serializer = new(options);
+
             foreach (var operation in operations)
             {
-                operation.BeginOperation(trace);
+                operation.Begin(trace);
             }
         }
 
@@ -31,7 +38,7 @@ namespace RepeatableCallTracer.Targets
         {
             foreach (var operation in operations.Reverse())
             {
-                operation.EndOperation();
+                operation.End();
             }
 
             new CallTracerValidator(options).CheckMethodParametersIfRequired(expectedParameters, actualParameters);
