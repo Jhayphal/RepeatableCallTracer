@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 
 using RepeatableCallTracer.Common;
+using RepeatableCallTracer.Debuggers;
 using RepeatableCallTracer.Dependencies;
 
 namespace RepeatableCallTracer.Targets
@@ -25,6 +26,33 @@ namespace RepeatableCallTracer.Targets
                   new ReflectionBasedTracedDependenciesProvider(options),
                   traceWriter,
                   debugTraceProvider,
+                  options)
+        {
+        }
+
+        public TracedTarget(
+            TTarget target,
+            ICallTraceWriter traceWriter,
+            ITracedTargetDependenciesProvider dependenciesProvider,
+            CallTracerOptions options)
+            : this(
+                  target,
+                  dependenciesProvider,
+                  traceWriter,
+                  new DebugCallTraceProvider(),
+                  options)
+        {
+        }
+
+        public TracedTarget(
+            TTarget target,
+            ICallTraceWriter traceWriter,
+            CallTracerOptions options)
+            : this(
+                  target,
+                  new ReflectionBasedTracedDependenciesProvider(options),
+                  traceWriter,
+                  new DebugCallTraceProvider(),
                   options)
         {
         }
