@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace RepeatableCallTracer
 {
     [JsonObjectCreationHandling(JsonObjectCreationHandling.Populate)]
-    public sealed record class CallTrace
+    public sealed class CallTrace
     {
         public required Version AssemblyVersion { get; init; }
 
