@@ -14,8 +14,7 @@ namespace RepeatableCallTracer.Targets
         IDebugCallTraceProvider debugTraceProvider,
         CallTracerOptions options)
     {
-        private readonly CallTracerSerializer serializer = new(options);
-        private readonly CallTracerValidator validator = new(options);
+        private readonly Type targetType = typeof(TTarget);
 
         public TracedTarget(
             TTarget target,
@@ -119,7 +118,7 @@ namespace RepeatableCallTracer.Targets
         protected IDebugCallTraceProvider DebugTraceProvider { get; } = debugTraceProvider;
 
         private bool IsDebug
-            => DebugTraceProvider.IsDebug(typeof(TTarget));
+            => DebugTraceProvider.IsDebug(targetType);
 
         protected ITracedTargetOperation BeginOperation(MethodBase method)
             => IsDebug
@@ -128,19 +127,18 @@ namespace RepeatableCallTracer.Targets
 
         private TracedTargetCallScope BeginCall(MethodBase method)
         {
-            var trace = CallTracesFactory.Create(typeof(TTarget), method);
+            var trace = CallTracesFactory.Create(targetType, method);
 
             var expectedParameters = method
                 .GetParameters()
                 .ToDictionary(p => p.Name!, p => p.ParameterType);
             var dependencies = DependenciesProvider.RetrieveDependenciesAndValidateIfRequired(Target);
             var scope = new TracedTargetCallScope(
-                serializer,
-                validator,
-                TraceWriter,
                 trace,
+                options,
+                expectedParameters,
                 dependencies,
-                expectedParameters);
+                TraceWriter);
 
             scope.BeginOperation();
 
@@ -149,7 +147,7 @@ namespace RepeatableCallTracer.Targets
 
         private TracedTargetDebugScope BeginDebug()
         {
-            var trace = DebugTraceProvider.GetTrace(typeof(TTarget));
+            var trace = DebugTraceProvider.GetTrace(targetType);
             var dependencies = DependenciesProvider.RetrieveDependenciesAndValidateIfRequired(Target);
             var scope = new TracedTargetDebugScope(trace, dependencies);
             scope.BeginDebug();

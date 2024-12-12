@@ -3,18 +3,19 @@
 namespace RepeatableCallTracer.Targets
 {
     internal sealed class TracedTargetCallScope(
-        CallTracerSerializer serializer,
-        CallTracerValidator rulesChecker,
-        ICallTraceWriter traceWriter,
         CallTrace trace,
+        CallTracerOptions options,
+        IReadOnlyDictionary<string, Type> expectedParameters,
         IEnumerable<ITracedDependencyOperation> operations,
-        IReadOnlyDictionary<string, Type> expectedParameters) : ITracedTargetOperation
+        ICallTraceWriter traceWriter) : ITracedTargetOperation
     {
-        private readonly CallTracerValidator rulesChecker = rulesChecker;
-        private readonly ICallTraceWriter traceWriter = traceWriter;
         private readonly CallTrace trace = trace;
-        private readonly IEnumerable<ITracedDependencyOperation> operations = operations;
+        private readonly CallTracerOptions options = options;
         private readonly IReadOnlyDictionary<string, Type> expectedParameters = expectedParameters;
+        private readonly IEnumerable<ITracedDependencyOperation> operations = operations;
+        private readonly ICallTraceWriter traceWriter = traceWriter;
+
+        private readonly CallTracerSerializer serializer = new(options);
 
         private readonly Dictionary<string, Type> actualParameters = [];
 
@@ -33,7 +34,7 @@ namespace RepeatableCallTracer.Targets
                 operation.EndOperation();
             }
 
-            rulesChecker.CheckMethodParametersIfRequired(expectedParameters, actualParameters);
+            new CallTracerValidator(options).CheckMethodParametersIfRequired(expectedParameters, actualParameters);
 
             traceWriter.Append(trace);
         }

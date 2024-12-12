@@ -1,6 +1,6 @@
 ﻿namespace RepeatableCallTracer.Common
 {
-    internal sealed class CallTracerValidator(CallTracerOptions options)
+    internal readonly struct CallTracerValidator(CallTracerOptions options)
     {
         public CallTracerOptions Options { get; } = options;
 
