@@ -8,6 +8,7 @@ namespace RepeatableCallTracer.Targets
 {
     public abstract class TracedTarget<TTarget>(
         TTarget target,
+        ICallTracesFactory callTracesFactory,
         ITracedTargetDependenciesProvider dependenciesProvider,
         ICallTraceWriter traceWriter,
         IDebugCallTraceProvider debugTraceProvider,
@@ -18,11 +19,59 @@ namespace RepeatableCallTracer.Targets
 
         public TracedTarget(
             TTarget target,
+            ICallTracesFactory callTracesFactory,
             ICallTraceWriter traceWriter,
             IDebugCallTraceProvider debugTraceProvider,
             CallTracerOptions options)
             : this(
                   target,
+                  callTracesFactory,
+                  new ReflectionBasedTracedDependenciesProvider(options),
+                  traceWriter,
+                  debugTraceProvider,
+                  options)
+        {
+        }
+
+        public TracedTarget(
+            TTarget target,
+            ICallTracesFactory callTracesFactory,
+            ICallTraceWriter traceWriter,
+            ITracedTargetDependenciesProvider dependenciesProvider,
+            CallTracerOptions options)
+            : this(
+                  target,
+                  callTracesFactory,
+                  dependenciesProvider,
+                  traceWriter,
+                  new DebugCallTraceProvider(),
+                  options)
+        {
+        }
+
+        public TracedTarget(
+            TTarget target,
+            ICallTracesFactory callTracesFactory,
+            ICallTraceWriter traceWriter,
+            CallTracerOptions options)
+            : this(
+                  target,
+                  callTracesFactory,
+                  new ReflectionBasedTracedDependenciesProvider(options),
+                  traceWriter,
+                  new DebugCallTraceProvider(),
+                  options)
+        {
+        }
+
+        public TracedTarget(
+            TTarget target,
+            ICallTraceWriter traceWriter,
+            IDebugCallTraceProvider debugTraceProvider,
+            CallTracerOptions options)
+            : this(
+                  target,
+                  new CallTracesFactory(),
                   new ReflectionBasedTracedDependenciesProvider(options),
                   traceWriter,
                   debugTraceProvider,
@@ -37,6 +86,7 @@ namespace RepeatableCallTracer.Targets
             CallTracerOptions options)
             : this(
                   target,
+                  new CallTracesFactory(),
                   dependenciesProvider,
                   traceWriter,
                   new DebugCallTraceProvider(),
@@ -50,6 +100,7 @@ namespace RepeatableCallTracer.Targets
             CallTracerOptions options)
             : this(
                   target,
+                  new CallTracesFactory(),
                   new ReflectionBasedTracedDependenciesProvider(options),
                   traceWriter,
                   new DebugCallTraceProvider(),
@@ -58,6 +109,8 @@ namespace RepeatableCallTracer.Targets
         }
 
         protected TTarget Target { get; } = target;
+
+        protected ICallTracesFactory CallTracesFactory { get; } = callTracesFactory;
 
         protected ITracedTargetDependenciesProvider DependenciesProvider { get; } = dependenciesProvider;
 
@@ -71,36 +124,23 @@ namespace RepeatableCallTracer.Targets
         protected ITracedTargetOperation BeginOperation(MethodBase method)
             => IsDebug
                 ? BeginDebug()
-                : BeginScope(method);
+                : BeginCall(method);
 
-        private TracedTargetCallScope BeginScope(MethodBase method)
+        private TracedTargetCallScope BeginCall(MethodBase method)
         {
-            ArgumentNullException.ThrowIfNull(method);
+            var trace = CallTracesFactory.Create(typeof(TTarget), method);
 
-            var methodSignature = method.ToString();
-            ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
-
-            var targetType = typeof(TTarget);
-            var assemblyVersion = targetType.Assembly.GetName().Version;
-            ArgumentNullException.ThrowIfNull(assemblyVersion);
-
-            var snapshot = new CallTrace
-            {
-                AssemblyVersion = assemblyVersion,
-                AssemblyQualifiedName = targetType.AssemblyQualifiedName!,
-                MethodSignature = methodSignature,
-                Created = DateTime.UtcNow
-            };
-
-            var expectedParameters = method.GetParameters();
+            var expectedParameters = method
+                .GetParameters()
+                .ToDictionary(p => p.Name!, p => p.ParameterType);
             var dependencies = DependenciesProvider.RetrieveDependenciesAndValidateIfRequired(Target);
             var scope = new TracedTargetCallScope(
                 serializer,
                 validator,
                 TraceWriter,
-                snapshot,
+                trace,
                 dependencies,
-                expectedParameters.ToDictionary(p => p.Name!, p => p.ParameterType));
+                expectedParameters);
 
             scope.BeginOperation();
 
