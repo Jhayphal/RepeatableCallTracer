@@ -6,8 +6,6 @@ namespace RepeatableCallTracer.Common
     {
         public CallTrace Create(Type targetType, MethodBase method)
         {
-            ArgumentNullException.ThrowIfNull(method);
-
             var methodSignature = method.ToString();
             ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
 

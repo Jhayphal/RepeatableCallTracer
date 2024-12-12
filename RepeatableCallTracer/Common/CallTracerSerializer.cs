@@ -2,7 +2,7 @@
 
 namespace RepeatableCallTracer.Common
 {
-    internal sealed class CallTracerSerializer(CallTracerOptions options)
+    internal readonly struct CallTracerSerializer(CallTracerOptions options)
     {
         private readonly CallTracerOptions options = options;
 
