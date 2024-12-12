@@ -2,13 +2,13 @@
 {
     internal readonly struct CallTracerValidator(CallTracerOptions options)
     {
-        public CallTracerOptions Options { get; } = options;
+        private readonly CallTracerOptions options = options;
 
         public void CheckMethodParametersIfRequired(
             IReadOnlyDictionary<string, Type> expectedParameters,
             IReadOnlyDictionary<string, Type> actualParameters)
         {
-            if (!Options.ThrowIfParametersDifferMethodSignature)
+            if (!options.ThrowIfParametersDifferMethodSignature)
             {
                 return;
             }

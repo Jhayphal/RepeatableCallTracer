@@ -12,8 +12,8 @@ namespace RepeatableCallTracer.Dependencies
 
             var result = new List<ITracedDependency>();
 
-            var properties = target
-                .GetType()
+            var targetType = typeof(TTarget);
+            var properties = targetType
                 .GetFields(BindingFlags.Instance
                     | BindingFlags.GetProperty
                     | BindingFlags.Public
@@ -31,8 +31,7 @@ namespace RepeatableCallTracer.Dependencies
                 }
             }
 
-            var fields = target
-                .GetType()
+            var fields = targetType
                 .GetFields(BindingFlags.Instance
                     | BindingFlags.GetField
                     | BindingFlags.Public

@@ -21,23 +21,25 @@ namespace RepeatableCallTracer.Dependencies
         public void AttachDebugger(CallTrace trace)
         {
             this.trace = trace;
-            callCounter = 0;
 
             IsDebuggerAttached = true;
         }
 
         public void DetachDebugger()
-            => trace = null;
+        {
+            trace = null;
+            callCounter = 0;
+        }
 
         public void BeginOperation(CallTrace trace)
         {
             this.trace = trace;
-            callCounter = 0;
         }
 
         public void EndOperation()
         {
             trace = null;
+            callCounter = 0;
         }
 
         public TResult GetResult<TResult>(MethodBase method)
