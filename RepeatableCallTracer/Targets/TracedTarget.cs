@@ -127,32 +127,28 @@ namespace RepeatableCallTracer.Targets
 
         private TracedTargetCallScope BeginCall(MethodBase method)
         {
-            var trace = CallTracesFactory.Create(targetType, method);
-
             var expectedParameters = method
                 .GetParameters()
                 .ToDictionary(p => p.Name!, p => p.ParameterType);
+
+            var trace = CallTracesFactory.Create(targetType, method);
+            
             var dependencies = DependenciesProvider.RetrieveDependenciesAndValidateIfRequired(Target);
-            var scope = new TracedTargetCallScope(
+            
+            return new TracedTargetCallScope(
                 trace,
                 options,
                 expectedParameters,
                 dependencies,
                 TraceWriter);
-
-            scope.BeginOperation();
-
-            return scope;
         }
 
         private TracedTargetDebugScope BeginDebug()
         {
             var trace = DebugTraceProvider.GetTrace(targetType);
             var dependencies = DependenciesProvider.RetrieveDependenciesAndValidateIfRequired(Target);
-            var scope = new TracedTargetDebugScope(trace, dependencies);
-            scope.BeginDebug();
-
-            return scope;
+            
+            return new TracedTargetDebugScope(trace, dependencies);
         }
     }
 }

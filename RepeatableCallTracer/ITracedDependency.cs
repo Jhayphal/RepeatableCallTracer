@@ -1,6 +1,6 @@
 ﻿namespace RepeatableCallTracer
 {
-    public interface ITracedDependency : ITracedDependencyOperation, ITracedDependencyDebuggable
+    public interface ITracedDependency : ITracedOperation
     {
         string AssemblyQualifiedName { get; }
     }

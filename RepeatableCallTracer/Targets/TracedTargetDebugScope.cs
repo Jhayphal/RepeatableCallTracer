@@ -1,25 +1,28 @@
 ﻿namespace RepeatableCallTracer.Targets
 {
-    internal sealed class TracedTargetDebugScope(
-        CallTrace trace,
-        IEnumerable<ITracedDependencyDebuggable> dependencies) : ITracedTargetOperation
+    internal sealed class TracedTargetDebugScope : ITracedTargetOperation
     {
-        private readonly CallTrace trace = trace;
-        private readonly IEnumerable<ITracedDependencyDebuggable> dependencies = dependencies;
+        private readonly CallTrace trace;
+        private readonly IEnumerable<ITracedOperation> operations;
 
-        public void BeginDebug()
+        public TracedTargetDebugScope(
+            CallTrace trace,
+            IEnumerable<ITracedOperation> operations)
         {
-            foreach (var dependency in dependencies)
+            this.trace = trace;
+            this.operations = operations;
+
+            foreach (var operation in operations)
             {
-                dependency.AttachDebugger(trace);
+                operation.Begin(trace);
             }
         }
 
         public void Dispose()
         {
-            foreach (var dependency in dependencies.Reverse())
+            foreach (var operation in operations.Reverse())
             {
-                dependency.DetachDebugger();
+                operation.End();
             }
         }
 

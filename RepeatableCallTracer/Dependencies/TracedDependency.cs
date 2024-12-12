@@ -31,12 +31,12 @@ namespace RepeatableCallTracer.Dependencies
             callCounter = 0;
         }
 
-        public void BeginOperation(CallTrace trace)
+        public void Begin(CallTrace trace)
         {
             this.trace = trace;
         }
 
-        public void EndOperation()
+        public void End()
         {
             trace = null;
             callCounter = 0;
