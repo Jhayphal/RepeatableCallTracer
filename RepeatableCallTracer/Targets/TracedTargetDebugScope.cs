@@ -3,26 +3,26 @@
     internal sealed class TracedTargetDebugScope : ITracedTargetOperation
     {
         private readonly CallTrace trace;
-        private readonly IEnumerable<ITracedOperation> operations;
+        private readonly IEnumerable<ITracedDependency> dependencies;
 
         public TracedTargetDebugScope(
             CallTrace trace,
-            IEnumerable<ITracedOperation> operations)
+            IEnumerable<ITracedDependency> dependencies)
         {
             this.trace = trace;
-            this.operations = operations;
+            this.dependencies = dependencies;
 
-            foreach (var operation in operations)
+            foreach (var operation in dependencies)
             {
-                operation.Begin(trace);
+                operation.AttachDebugger(trace);
             }
         }
 
         public void Dispose()
         {
-            foreach (var operation in operations.Reverse())
+            foreach (var operation in dependencies.Reverse())
             {
-                operation.End();
+                operation.DetachDebugger();
             }
         }
 

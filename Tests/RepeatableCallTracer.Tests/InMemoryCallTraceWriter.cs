@@ -1,14 +1,11 @@
 ﻿namespace RepeatableCallTracer.Tests;
 
-public partial class SumBusinessLogicTest
+internal sealed class InMemoryCallTraceWriter : ICallTraceWriter
 {
-    internal sealed class InMemoryCallTraceWriter : ICallTraceWriter
-    {
-        public LinkedList<CallTrace> Traces { get; } = [];
+    public LinkedList<CallTrace> Traces { get; } = [];
 
-        public void Append(CallTrace trace)
-        {
-            Traces.AddLast(trace);
-        }
+    public void Append(CallTrace trace)
+    {
+        Traces.AddLast(trace);
     }
 }

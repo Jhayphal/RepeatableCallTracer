@@ -7,7 +7,7 @@ namespace RepeatableCallTracer.Targets
         private readonly CallTrace trace;
         private readonly CallTracerOptions options;
         private readonly IReadOnlyDictionary<string, Type> expectedParameters;
-        private readonly IEnumerable<ITracedOperation> operations;
+        private readonly IEnumerable<ITracedDependency> dependencies;
         private readonly ICallTraceWriter traceWriter;
 
         private readonly CallTracerSerializer serializer;
@@ -18,27 +18,27 @@ namespace RepeatableCallTracer.Targets
             CallTrace trace,
             CallTracerOptions options,
             IReadOnlyDictionary<string, Type> expectedParameters,
-            IEnumerable<ITracedOperation> operations,
+            IEnumerable<ITracedDependency> dependencies,
             ICallTraceWriter traceWriter)
         {
             this.trace = trace;
             this.options = options;
             this.expectedParameters = expectedParameters;
-            this.operations = operations;
+            this.dependencies = dependencies;
             this.traceWriter = traceWriter;
             serializer = new(options);
 
-            foreach (var operation in operations)
+            foreach (var operation in dependencies)
             {
-                operation.Begin(trace);
+                operation.BeginOperation(trace);
             }
         }
 
         public void Dispose()
         {
-            foreach (var operation in operations.Reverse())
+            foreach (var operation in dependencies.Reverse())
             {
-                operation.End();
+                operation.EndOperation();
             }
 
             new CallTracerValidator(options).CheckMethodParametersIfRequired(expectedParameters, actualParameters);
