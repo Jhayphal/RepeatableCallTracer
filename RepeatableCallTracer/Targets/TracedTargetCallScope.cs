@@ -41,7 +41,7 @@ namespace RepeatableCallTracer.Targets
                 operation.EndOperation();
             }
 
-            new CallTracerValidator(options).CheckMethodParametersIfRequired(expectedParameters, actualParameters);
+            CheckMethodParametersIfRequired();
 
             traceWriter.Append(trace);
         }
@@ -83,6 +83,42 @@ namespace RepeatableCallTracer.Targets
             actualParameters.TryAdd(name, typeof(TParameter));
 
             return value;
+        }
+
+        private void CheckMethodParametersIfRequired()
+        {
+            if (!options.ThrowIfParametersDifferMethodSignature)
+            {
+                return;
+            }
+
+            HashSet<string> processedParameters = [];
+
+            foreach (var parameter in expectedParameters)
+            {
+                var parameterName = parameter.Key;
+                if (parameterName is not null)
+                {
+                    if (!actualParameters.TryGetValue(parameterName, out var parameterType))
+                    {
+                        throw new InvalidProgramException($"Parameter '{parameterName}' was not defined.");
+                    }
+                    else if (parameterType != parameter.Value)
+                    {
+                        throw new InvalidProgramException($"Parameter '{parameterName}' has wrong type - '{parameterType}'. Expected type is '{parameter.Value}'.");
+                    }
+
+                    processedParameters.Add(parameterName);
+                }
+            }
+
+            foreach (var parameterName in actualParameters.Keys)
+            {
+                if (!processedParameters.Contains(parameterName))
+                {
+                    throw new InvalidOperationException($"Unexpected parameter '{parameterName}'.");
+                }
+            }
         }
     }
 }
