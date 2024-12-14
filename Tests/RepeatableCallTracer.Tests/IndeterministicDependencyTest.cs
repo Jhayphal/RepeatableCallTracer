@@ -111,4 +111,22 @@ public partial class IndeterministicDependencyTest
 
         Assert.Throws<InvalidProgramException>(() => tracer.Sum());
     }
+
+    [Fact]
+    public void Test_WithoutArgs_WithIndeterministicExternalDependencies_WithUntrackedDependency_NoValidationException()
+    {
+        DebugCallTraceProvider debugCallTraceProvider = new();
+        InMemoryCallTraceWriter callTraceWriter = new();
+        CallTracerOptions options = new()
+        {
+            ThrowIfHasUntrackedDependencies = false
+        };
+
+        RandomNumbersProvider numbersProvider = new();
+
+        SumBusinessLogic target = new(numbersProvider);
+        SumBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);
+
+        _ = tracer.Sum();
+    }
 }
