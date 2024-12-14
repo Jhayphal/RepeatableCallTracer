@@ -6,7 +6,7 @@ using RepeatableCallTracer.Targets;
 
 namespace RepeatableCallTracer.Tests;
 
-public partial class WithoutDependenciesTest
+public partial class WithoutExternalDependenciesTest
 {
     internal interface ISumBusinessLogic
     {
@@ -40,7 +40,7 @@ public partial class WithoutDependenciesTest
     }
 
     [Fact]
-    public void Test_PrimitiveTypesArgs_WithoutExternalDependencies_Successful()
+    public void Test_PrimitiveTypesArgs_Successful()
     {
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
