@@ -6,7 +6,7 @@ using RepeatableCallTracer.Targets;
 
 namespace RepeatableCallTracer.Tests;
 
-public partial class SumBusinessLogicTest
+public partial class WithoutDependenciesTest
 {
     internal interface ISumBusinessLogic
     {
