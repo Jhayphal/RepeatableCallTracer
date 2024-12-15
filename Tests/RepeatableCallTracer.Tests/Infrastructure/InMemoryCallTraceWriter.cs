@@ -1,4 +1,4 @@
-﻿namespace RepeatableCallTracer.Tests;
+﻿namespace RepeatableCallTracer.Tests.Infrastructure;
 
 internal sealed class InMemoryCallTraceWriter : ICallTraceWriter
 {

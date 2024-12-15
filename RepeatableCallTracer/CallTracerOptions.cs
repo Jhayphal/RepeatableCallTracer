@@ -2,12 +2,23 @@
 
 namespace RepeatableCallTracer
 {
-    public sealed class CallTracerOptions
+    public readonly record struct CallTracerOptions(
+        bool ThrowIfHasUntrackedDependencies,
+        bool ThrowIfParametersDifferMethodSignature,
+        bool ThrowIfValueCannotBeDeserializedCorrectly)
     {
-        public bool ThrowIfHasUntrackedDependencies { get; set; } = Debugger.IsAttached;
+        public static CallTracerOptions Default
+        {
+            get
+            {
+                var isDebuggerAttached = Debugger.IsAttached;
 
-        public bool ThrowIfParametersDifferMethodSignature { get; set; } = Debugger.IsAttached;
+                return new(isDebuggerAttached, isDebuggerAttached, isDebuggerAttached);
+            }
+        }
 
-        public bool ThrowIfValueCannotBeDeserializedCorrectly { get; set; } = Debugger.IsAttached;
+        public static CallTracerOptions Strict => new(true, true, true);
+
+        public static CallTracerOptions Fastest => new(false, false, false);
     }
 }

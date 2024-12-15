@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 
 using RepeatableCallTracer.Debuggers;
 using RepeatableCallTracer.Targets;
+using RepeatableCallTracer.Tests.Infrastructure;
 
 namespace RepeatableCallTracer.Tests;
 
@@ -27,7 +28,7 @@ public partial class AsyncTargetMethodTest
         SumBusinessLogic target,
         ICallTraceWriter callTraceWriter,
         IDebugCallTraceProvider debugCallTraceProvider)
-        : TracedTarget<ISumBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, new CallTracerOptions()), ISumBusinessLogic
+        : TracedTarget<ISumBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, CallTracerOptions.Strict), ISumBusinessLogic
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
         public async Task<int> CalculateAsync(int a, int b)

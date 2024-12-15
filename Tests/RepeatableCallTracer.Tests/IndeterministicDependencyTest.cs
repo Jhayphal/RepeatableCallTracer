@@ -5,6 +5,7 @@ using RepeatableCallTracer.Common;
 using RepeatableCallTracer.Debuggers;
 using RepeatableCallTracer.Dependencies;
 using RepeatableCallTracer.Targets;
+using RepeatableCallTracer.Tests.Infrastructure;
 
 namespace RepeatableCallTracer.Tests;
 
@@ -76,13 +77,12 @@ public partial class IndeterministicDependencyTest
     {
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
-        CallTracerOptions options = new();
 
         RandomNumbersProvider numbersProvider = new();
         RandomNumbersProviderTracer numbersProviderTracer = new(numbersProvider);
 
         SumBusinessLogic target = new(numbersProviderTracer);
-        SumBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);
+        SumBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, CallTracerOptions.Strict);
 
         var actualForwardCallResult = tracer.Sum();
         Assert.Single(callTraceWriter.Traces);
