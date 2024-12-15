@@ -1,14 +1,16 @@
-﻿namespace RepeatableCallTracer.Debuggers
+﻿using System.Reflection;
+
+namespace RepeatableCallTracer.Debuggers
 {
     public sealed class DebugCallTraceProvider : IDebugCallTraceProvider
     {
-        private readonly Dictionary<Type, CallTrace> traces = [];
+        private readonly Dictionary<Type, Dictionary<string, CallTrace>> traces = [];
 
-        public bool IsDebug(Type targetType)
-            => traces.ContainsKey(targetType);
+        public bool IsDebug(Type targetType, MethodBase method)
+            => traces.TryGetValue(targetType, out var calls) && calls.ContainsKey(method.ToString()!);
 
-        public CallTrace GetTrace(Type targetType)
-            => traces[targetType];
+        public CallTrace GetTrace(Type targetType, MethodBase method)
+            => traces[targetType][method.ToString()!];
 
         public void EnableDebug(Type targetType, CallTrace trace)
         {
@@ -17,10 +19,27 @@
                 throw new ArgumentOutOfRangeException(nameof(trace));
             }
 
-            traces[targetType] = trace;
+            if (!traces.TryGetValue(targetType, out var calls))
+            {
+                calls = [];
+
+                traces[targetType] = calls;
+            }
+
+            calls[trace.MethodSignature] = trace;
         }
 
-        public void DisableDebug(Type targetType)
+        public bool DisableDebug(Type targetType)
             => traces.Remove(targetType);
+
+        public bool DisableDebug(Type targetType, MethodBase method)
+        {
+            if (!traces.TryGetValue(targetType, out var calls))
+            {
+                return false;
+            }
+
+            return calls.Remove(method.ToString()!);
+        }
     }
 }

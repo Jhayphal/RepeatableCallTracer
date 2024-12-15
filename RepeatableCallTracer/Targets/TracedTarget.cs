@@ -63,12 +63,12 @@ namespace RepeatableCallTracer.Targets
 
         protected IDebugCallTraceProvider DebugTraceProvider { get; } = debugTraceProvider;
 
-        private bool IsDebug
-            => DebugTraceProvider.IsDebug(targetType);
+        private bool IsDebug(MethodBase method)
+            => DebugTraceProvider.IsDebug(targetType, method);
 
         protected ITracedTargetOperation BeginOperation(MethodBase method)
-            => IsDebug
-                ? BeginDebug()
+            => IsDebug(method)
+                ? BeginDebug(method)
                 : BeginCall(method);
 
         private TracedTargetCallScope BeginCall(MethodBase method)
@@ -101,9 +101,9 @@ namespace RepeatableCallTracer.Targets
                 TraceWriter);
         }
 
-        private TracedTargetDebugScope BeginDebug()
+        private TracedTargetDebugScope BeginDebug(MethodBase method)
         {
-            var trace = DebugTraceProvider.GetTrace(targetType);
+            var trace = DebugTraceProvider.GetTrace(targetType, method);
             var dependencies = DependenciesProvider.RetrieveDependenciesAndValidateIfRequired(Target);
             
             return new TracedTargetDebugScope(trace, dependencies);

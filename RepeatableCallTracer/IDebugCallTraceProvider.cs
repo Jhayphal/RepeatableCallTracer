@@ -1,9 +1,11 @@
-﻿namespace RepeatableCallTracer
+﻿using System.Reflection;
+
+namespace RepeatableCallTracer
 {
     public interface IDebugCallTraceProvider
     {
-        bool IsDebug(Type targetType);
+        bool IsDebug(Type targetType, MethodBase method);
 
-        CallTrace GetTrace(Type targetType);
+        CallTrace GetTrace(Type targetType, MethodBase method);
     }
 }
