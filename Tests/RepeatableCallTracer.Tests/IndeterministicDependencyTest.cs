@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-
-using RepeatableCallTracer.Common;
+﻿using RepeatableCallTracer.Common;
 using RepeatableCallTracer.Debuggers;
 using RepeatableCallTracer.Dependencies;
 using RepeatableCallTracer.Targets;
@@ -27,15 +24,10 @@ public partial class IndeterministicDependencyTest
     internal sealed class RandomNumbersProviderTracer(INumbersProvider target)
         : TracedDependency<INumbersProvider>(target, new()), INumbersProvider
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public IEnumerable<int> GetNumbers()
-        {
-            var method = MethodBase.GetCurrentMethod()!;
-
-            return IsDebuggerAttached
-                ? GetResult<IEnumerable<int>>(method)
-                : SetResult(method, Dependency.GetNumbers(), TracerEqualityHelper.SequenceEqual);
-        }
+            => IsDebuggerAttached
+                ? GetResult(() => GetNumbers())
+                : SetResult(() => GetNumbers(), Dependency.GetNumbers(), TracerEqualityHelper.SequenceEqual);
     }
 
     internal interface ISumBusinessLogic
@@ -63,10 +55,9 @@ public partial class IndeterministicDependencyTest
         CallTracerOptions options)
         : TracedTarget<ISumBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, options), ISumBusinessLogic
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public int Sum()
         {
-            using var scope = BeginOperation(MethodBase.GetCurrentMethod()!);
+            using var scope = BeginOperation(() => Sum());
 
             return Target.Sum();
         }

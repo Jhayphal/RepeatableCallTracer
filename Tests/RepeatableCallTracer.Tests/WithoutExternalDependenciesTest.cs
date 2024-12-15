@@ -1,6 +1,3 @@
-using System.Reflection;
-using System.Runtime.CompilerServices;
-
 using RepeatableCallTracer.Debuggers;
 using RepeatableCallTracer.Targets;
 using RepeatableCallTracer.Tests.Infrastructure;
@@ -31,10 +28,9 @@ public partial class WithoutExternalDependenciesTest
         IDebugCallTraceProvider debugCallTraceProvider)
         : TracedTarget<ISumBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, CallTracerOptions.Strict), ISumBusinessLogic
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public int Calculate(int a, int b)
         {
-            using var scope = BeginOperation(MethodBase.GetCurrentMethod()!);
+            using var scope = BeginOperation(() => Calculate(a, b));
 
             a = scope.SetParameter(nameof(a), a);
             b = scope.SetParameter(nameof(b), b);
@@ -42,10 +38,9 @@ public partial class WithoutExternalDependenciesTest
             return Target.Calculate(a, b);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public int Get(int x)
         {
-            using var scope = BeginOperation(MethodBase.GetCurrentMethod()!);
+            using var scope = BeginOperation(() => Get(x));
 
             x = scope.SetParameter(nameof(x), x);
 

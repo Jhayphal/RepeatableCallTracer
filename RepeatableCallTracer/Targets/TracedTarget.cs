@@ -87,7 +87,7 @@ namespace RepeatableCallTracer.Targets
             return BeginOperation(call.Method);
         }
 
-        protected ITracedTargetOperation BeginOperation(MethodBase method)
+        private ITracedTargetOperation BeginOperation(MethodBase method)
             => IsDebug(method)
                 ? BeginDebug(method)
                 : BeginCall(method);

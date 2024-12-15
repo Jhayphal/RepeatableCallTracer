@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
 
 using RepeatableCallTracer.Common;
 
@@ -42,7 +43,17 @@ namespace RepeatableCallTracer.Dependencies
             callCounter = 0;
         }
 
-        public TResult GetResult<TResult>(MethodBase method)
+        public TResult GetResult<TResult>(Expression<Func<TResult>> expression)
+        {
+            if (expression.Body is not MethodCallExpression call)
+            {
+                throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
+            }
+
+            return GetResult<TResult>(call.Method);
+        }
+
+        private TResult GetResult<TResult>(MethodBase method)
         {
             ArgumentNullException.ThrowIfNull(trace);
 
@@ -50,6 +61,44 @@ namespace RepeatableCallTracer.Dependencies
         }
 
         public TResult SetResult<TResult>(
+            Expression<Func<TResult>> expression,
+            TResult methodResult) where TResult : IEquatable<TResult>
+        {
+            if (expression.Body is not MethodCallExpression call)
+            {
+                throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
+            }
+
+            return SetResult(call.Method, methodResult);
+        }
+
+        public TResult SetResult<TResult>(
+            Expression<Func<TResult>> expression,
+            TResult methodResult,
+            IEqualityComparer<TResult> equalityComparer)
+        {
+            if (expression.Body is not MethodCallExpression call)
+            {
+                throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
+            }
+
+            return SetResult(call.Method, methodResult, equalityComparer);
+        }
+
+        public TResult SetResult<TResult>(
+            Expression<Func<TResult>> expression,
+            TResult methodResult,
+            Func<TResult?, TResult?, bool> equals)
+        {
+            if (expression.Body is not MethodCallExpression call)
+            {
+                throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
+            }
+
+            return SetResult(call.Method, methodResult, equals);
+        }
+
+        private TResult SetResult<TResult>(
             MethodBase method,
             TResult methodResult) where TResult : IEquatable<TResult>
         {
@@ -65,7 +114,7 @@ namespace RepeatableCallTracer.Dependencies
             return methodResult;
         }
 
-        public TResult SetResult<TResult>(
+        private TResult SetResult<TResult>(
             MethodBase method,
             TResult methodResult,
             IEqualityComparer<TResult> equalityComparer)
@@ -82,7 +131,7 @@ namespace RepeatableCallTracer.Dependencies
             return methodResult;
         }
 
-        public TResult SetResult<TResult>(
+        private TResult SetResult<TResult>(
             MethodBase method,
             TResult methodResult,
             Func<TResult?, TResult?, bool> equals)
