@@ -8,12 +8,12 @@ namespace RepeatableCallTracer.Tests;
 
 public partial class AsyncTargetMethodTest
 {
-    internal interface ISumBusinessLogic
+    internal interface ISomeBusinessLogic
     {
         Task<int> CalculateAsync(int a, int b);
     }
 
-    internal sealed class SumBusinessLogic : ISumBusinessLogic
+    internal sealed class SomeBusinessLogic : ISomeBusinessLogic
     {
         public async Task<int> CalculateAsync(int a, int b)
         {
@@ -23,11 +23,11 @@ public partial class AsyncTargetMethodTest
         }
     }
 
-    internal sealed class SumBusinessLogicTracer(
-        SumBusinessLogic target,
+    internal sealed class SomeBusinessLogicTracer(
+        SomeBusinessLogic target,
         ICallTraceWriter callTraceWriter,
         IDebugCallTraceProvider debugCallTraceProvider)
-        : TracedTarget<ISumBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, CallTracerOptions.Strict), ISumBusinessLogic
+        : TracedTarget<ISomeBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, CallTracerOptions.Strict), ISomeBusinessLogic
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
         public async Task<int> CalculateAsync(int a, int b)
@@ -47,8 +47,8 @@ public partial class AsyncTargetMethodTest
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
 
-        SumBusinessLogic target = new();
-        SumBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider);
+        SomeBusinessLogic target = new();
+        SomeBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider);
 
         var expectedA = 1;
         var expectedB = 2;
@@ -57,7 +57,7 @@ public partial class AsyncTargetMethodTest
         Assert.Single(callTraceWriter.Traces);
 
         var trace = callTraceWriter.Traces.First!.Value;
-        debugCallTraceProvider.EnableDebug(typeof(ISumBusinessLogic), trace);
+        debugCallTraceProvider.EnableDebug(typeof(ISomeBusinessLogic), trace);
 
         var actualDebugCallResult = await tracer.CalculateAsync(0, 0);
         Assert.Equal(actualForwardCallResult, actualDebugCallResult);

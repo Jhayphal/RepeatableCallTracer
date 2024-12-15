@@ -30,12 +30,12 @@ public partial class IndeterministicDependencyTest
                 : SetResult(() => GetNumbers(), Dependency.GetNumbers(), TracerEqualityHelper.SequenceEqual);
     }
 
-    internal interface ISumBusinessLogic
+    internal interface ISomeBusinessLogic
     {
         int Sum();
     }
 
-    internal sealed class SumBusinessLogic(INumbersProvider numbersProvider) : ISumBusinessLogic
+    internal sealed class SomeBusinessLogic(INumbersProvider numbersProvider) : ISomeBusinessLogic
     {
         private readonly INumbersProvider numbersProvider = numbersProvider;
 
@@ -48,12 +48,12 @@ public partial class IndeterministicDependencyTest
         }
     }
 
-    internal sealed class SumBusinessLogicTracer(
-        SumBusinessLogic target,
+    internal sealed class SomeBusinessLogicTracer(
+        SomeBusinessLogic target,
         ICallTraceWriter callTraceWriter,
         IDebugCallTraceProvider debugCallTraceProvider,
         CallTracerOptions options)
-        : TracedTarget<ISumBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, options), ISumBusinessLogic
+        : TracedTarget<ISomeBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, options), ISomeBusinessLogic
     {
         public int Sum()
         {
@@ -72,14 +72,14 @@ public partial class IndeterministicDependencyTest
         RandomNumbersProvider numbersProvider = new();
         RandomNumbersProviderTracer numbersProviderTracer = new(numbersProvider);
 
-        SumBusinessLogic target = new(numbersProviderTracer);
-        SumBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, CallTracerOptions.Strict);
+        SomeBusinessLogic target = new(numbersProviderTracer);
+        SomeBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, CallTracerOptions.Strict);
 
         var actualForwardCallResult = tracer.Sum();
         Assert.Single(callTraceWriter.Traces);
 
         var trace = callTraceWriter.Traces.First!.Value;
-        debugCallTraceProvider.EnableDebug(typeof(ISumBusinessLogic), trace);
+        debugCallTraceProvider.EnableDebug(typeof(ISomeBusinessLogic), trace);
 
         var actualDebugCallResult = tracer.Sum();
         Assert.Equal(actualForwardCallResult, actualDebugCallResult);
@@ -97,8 +97,8 @@ public partial class IndeterministicDependencyTest
 
         RandomNumbersProvider numbersProvider = new();
 
-        SumBusinessLogic target = new(numbersProvider);
-        SumBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);
+        SomeBusinessLogic target = new(numbersProvider);
+        SomeBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);
 
         Assert.Throws<InvalidProgramException>(() => tracer.Sum());
     }
@@ -115,8 +115,8 @@ public partial class IndeterministicDependencyTest
 
         RandomNumbersProvider numbersProvider = new();
 
-        SumBusinessLogic target = new(numbersProvider);
-        SumBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);
+        SomeBusinessLogic target = new(numbersProvider);
+        SomeBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);
 
         _ = tracer.Sum();
     }
