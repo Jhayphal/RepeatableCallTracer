@@ -38,8 +38,8 @@ public partial class WithoutExternalDependenciesTest
         {
             using var scope = BeginOperation(() => Calculate(a, b));
 
-            a = scope.SetParameter(nameof(a), a);
-            b = scope.SetParameter(nameof(b), b);
+            scope.SetParameter(nameof(a), ref a);
+            scope.SetParameter(nameof(b), ref b);
 
             return Target.Calculate(a, b);
         }
@@ -48,7 +48,7 @@ public partial class WithoutExternalDependenciesTest
         {
             using var scope = BeginOperation(() => Get(x));
 
-            x = scope.SetParameter(nameof(x), x);
+            scope.SetParameter(nameof(x), ref x);
 
             return Target.Get(x);
         }
@@ -57,8 +57,8 @@ public partial class WithoutExternalDependenciesTest
         {
             using var scope = BeginOperation(() => Sub(a, b));
 
-            a = scope.SetParameter(nameof(a), a);
-            // b = scope.SetParameter(nameof(b), b);
+            scope.SetParameter(nameof(a), ref a);
+            // scope.SetParameter(nameof(b), ref b);
 
             return Target.Sub(a, b);
         }

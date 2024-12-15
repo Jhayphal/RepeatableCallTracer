@@ -34,8 +34,8 @@ public partial class AsyncTargetMethodTest
         {
             using var scope = BeginOperation(() => CalculateAsync(a, b));
 
-            a = scope.SetParameter(nameof(a), a);
-            b = scope.SetParameter(nameof(b), b);
+            scope.SetParameter(nameof(a), ref a);
+            scope.SetParameter(nameof(b), ref b);
 
             return await Target.CalculateAsync(a, b);
         }

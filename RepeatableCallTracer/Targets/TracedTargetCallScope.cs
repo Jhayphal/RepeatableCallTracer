@@ -46,20 +46,18 @@ namespace RepeatableCallTracer.Targets
             traceWriter.Append(trace);
         }
 
-        public TParameter SetParameter<TParameter>(string name, TParameter value) where TParameter : IEquatable<TParameter>
+        public void SetParameter<TParameter>(string name, ref TParameter value) where TParameter : IEquatable<TParameter>
         {
             trace.MethodParameters[name] = serializer.SerializeAndCheckDeserializationIfRequired(
                 value,
                 EqualityComparer<TParameter>.Default.Equals);
 
             actualParameters.TryAdd(name, typeof(TParameter));
-
-            return value;
         }
 
-        public TParameter SetParameter<TParameter>(
+        public void SetParameter<TParameter>(
             string name,
-            TParameter value,
+            ref TParameter value,
             EqualityComparer<TParameter> equalityComparer)
         {
             trace.MethodParameters[name] = serializer.SerializeAndCheckDeserializationIfRequired(
@@ -67,13 +65,11 @@ namespace RepeatableCallTracer.Targets
                 equalityComparer.Equals);
 
             actualParameters.TryAdd(name, typeof(TParameter));
-
-            return value;
         }
 
-        public TParameter SetParameter<TParameter>(
+        public void SetParameter<TParameter>(
             string name,
-            TParameter value,
+            ref TParameter value,
             Func<TParameter?, TParameter?, bool> equals)
         {
             trace.MethodParameters[name] = serializer.SerializeAndCheckDeserializationIfRequired(
@@ -81,8 +77,6 @@ namespace RepeatableCallTracer.Targets
                 equals);
 
             actualParameters.TryAdd(name, typeof(TParameter));
-
-            return value;
         }
 
         private void CheckMethodParametersIfRequired()

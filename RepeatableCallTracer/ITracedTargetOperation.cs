@@ -2,10 +2,10 @@
 {
     public interface ITracedTargetOperation : IDisposable
     {
-        TParameter SetParameter<TParameter>(string name, TParameter value) where TParameter : IEquatable<TParameter>;
+        void SetParameter<TParameter>(string name, ref TParameter value) where TParameter : IEquatable<TParameter>;
 
-        TParameter SetParameter<TParameter>(string name, TParameter value, EqualityComparer<TParameter> equalityComparer);
+        void SetParameter<TParameter>(string name, ref TParameter value, EqualityComparer<TParameter> equalityComparer);
 
-        TParameter SetParameter<TParameter>(string name, TParameter value, Func<TParameter?, TParameter?, bool> equals);
+        void SetParameter<TParameter>(string name, ref TParameter value, Func<TParameter?, TParameter?, bool> equals);
     }
 }
