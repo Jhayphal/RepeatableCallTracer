@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
 
 using RepeatableCallTracer.Debuggers;
 using RepeatableCallTracer.Dependencies;
@@ -65,6 +66,26 @@ namespace RepeatableCallTracer.Targets
 
         private bool IsDebug(MethodBase method)
             => DebugTraceProvider.IsDebug(targetType, method);
+
+        protected ITracedTargetOperation BeginOperation(Expression<Action> expression)
+        {
+            if (expression.Body is not MethodCallExpression call)
+            {
+                throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
+            }
+
+            return BeginOperation(call.Method);
+        }
+
+        protected ITracedTargetOperation BeginOperation<TResult>(Expression<Func<TResult>> expression)
+        {
+            if (expression.Body is not MethodCallExpression call)
+            {
+                throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
+            }
+
+            return BeginOperation(call.Method);
+        }
 
         protected ITracedTargetOperation BeginOperation(MethodBase method)
             => IsDebug(method)

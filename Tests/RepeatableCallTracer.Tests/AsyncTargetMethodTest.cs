@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 using RepeatableCallTracer.Debuggers;
 using RepeatableCallTracer.Targets;
@@ -33,7 +32,7 @@ public partial class AsyncTargetMethodTest
         [MethodImpl(MethodImplOptions.NoInlining)]
         public async Task<int> CalculateAsync(int a, int b)
         {
-            using var scope = BeginOperation(MethodBase.GetCurrentMethod()!);
+            using var scope = BeginOperation(() => CalculateAsync(a, b));
 
             a = scope.SetParameter(nameof(a), a);
             b = scope.SetParameter(nameof(b), b);
