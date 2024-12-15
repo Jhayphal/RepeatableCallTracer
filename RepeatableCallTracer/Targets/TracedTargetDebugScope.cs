@@ -26,13 +26,13 @@
             }
         }
 
-        public TParameter SetParameter<TParameter>(string name, TParameter value) where TParameter : IEquatable<TParameter>
-            => SetParameter(name, value, EqualityComparer<TParameter>.Default.Equals);
+        public void SetParameter<TParameter>(string name, ref TParameter value) where TParameter : IEquatable<TParameter>
+            => SetParameter(name, ref value, EqualityComparer<TParameter>.Default.Equals);
 
-        public TParameter SetParameter<TParameter>(string name, TParameter value, EqualityComparer<TParameter> equalityComparer)
-            => SetParameter(name, value, EqualityComparer<TParameter>.Default.Equals);
+        public void SetParameter<TParameter>(string name, ref TParameter value, EqualityComparer<TParameter> equalityComparer)
+            => SetParameter(name, ref value, EqualityComparer<TParameter>.Default.Equals);
 
-        public TParameter SetParameter<TParameter>(string name, TParameter value, Func<TParameter, TParameter, bool> equals)
-            => trace.GetTargetMethodParameter<TParameter>(name);
+        public void SetParameter<TParameter>(string name, ref TParameter value, Func<TParameter, TParameter, bool> equals)
+            => value = trace.GetTargetMethodParameter<TParameter>(name);
     }
 }
