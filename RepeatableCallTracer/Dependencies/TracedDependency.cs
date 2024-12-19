@@ -62,7 +62,10 @@ namespace RepeatableCallTracer.Dependencies
 
         private TResult GetResult<TResult>(MethodBase method)
         {
-            //ArgumentNullException.ThrowIfNull(trace);
+            if (trace is null)
+            {
+                throw new ArgumentNullException(nameof(trace));
+            }
 
             return trace.GetDependencyMethodResult<TResult>(this, method, ++callCounter);
         }
@@ -109,8 +112,10 @@ namespace RepeatableCallTracer.Dependencies
             MethodBase method,
             TResult methodResult) where TResult : IEquatable<TResult>
         {
-            //ArgumentNullException.ThrowIfNull(trace);
-            //ArgumentNullException.ThrowIfNull(serializer);
+            if (trace is null)
+            {
+                throw new ArgumentNullException(nameof(trace));
+            }
 
             var methodResultJson = serializer.SerializeAndCheckDeserializationIfRequired(
                 methodResult,
@@ -126,8 +131,10 @@ namespace RepeatableCallTracer.Dependencies
             TResult methodResult,
             IEqualityComparer<TResult> equalityComparer)
         {
-            //ArgumentNullException.ThrowIfNull(trace);
-            //ArgumentNullException.ThrowIfNull(serializer);
+            if (trace is null)
+            {
+                throw new ArgumentNullException(nameof(trace));
+            }
 
             var methodResultJson = serializer.SerializeAndCheckDeserializationIfRequired(
                 methodResult,
@@ -143,8 +150,10 @@ namespace RepeatableCallTracer.Dependencies
             TResult methodResult,
             Func<TResult, TResult, bool> equals)
         {
-            //ArgumentNullException.ThrowIfNull(trace);
-            //ArgumentNullException.ThrowIfNull(serializer);
+            if (trace is null)
+            {
+                throw new ArgumentNullException(nameof(trace));
+            }
 
             var methodResultJson = serializer.SerializeAndCheckDeserializationIfRequired(
                 methodResult,

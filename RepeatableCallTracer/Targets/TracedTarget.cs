@@ -107,14 +107,20 @@ namespace RepeatableCallTracer.Targets
         private TracedTargetCallScope BeginCall(MethodBase method)
         {
             var methodSignature = method.ToString();
-            //ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
+            if (string.IsNullOrWhiteSpace(methodSignature))
+            {
+                throw new ArgumentException("Method signature cannot be empty.", nameof(methodSignature));
+            }
 
             var expectedParameters = method
                 .GetParameters()
                 .ToDictionary(p => p.Name, p => p.ParameterType);
 
             var assemblyVersion = targetType.Assembly.GetName().Version;
-            //ArgumentNullException.ThrowIfNull(assemblyVersion);
+            if (assemblyVersion is null)
+            {
+                throw new ArgumentNullException(nameof(assemblyVersion));
+            }
 
             var trace = new CallTrace(assemblyVersion, targetType.AssemblyQualifiedName, methodSignature, DateTime.UtcNow);
 

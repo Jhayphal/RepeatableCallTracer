@@ -45,7 +45,10 @@ namespace RepeatableCallTracer
             int callId)
         {
             var methodSignature = method.ToString();
-            //ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
+            if (string.IsNullOrWhiteSpace(methodSignature))
+            {
+                throw new ArgumentException("Method signature cannot be empty.", nameof(methodSignature));
+            }
 
             var content = ProvidedData[dependency.AssemblyQualifiedName][methodSignature][callId];
 
@@ -59,7 +62,10 @@ namespace RepeatableCallTracer
             string methodResultJson)
         {
             var methodSignature = method.ToString();
-            //ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
+            if (string.IsNullOrWhiteSpace(methodSignature))
+            {
+                throw new ArgumentException("Method signature cannot be empty.", nameof(methodSignature));
+            }
 
             if (!ProvidedData.TryGetValue(dependency.AssemblyQualifiedName, out var methods))
             {

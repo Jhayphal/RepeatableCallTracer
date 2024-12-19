@@ -15,7 +15,10 @@ namespace RepeatableCallTracer.Dependencies
 
         public IEnumerable<ITracedDependency> RetrieveDependenciesAndValidateIfRequired<TTarget>(TTarget target)
         {
-            //ArgumentNullException.ThrowIfNull(target);
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
             var result = new List<ITracedDependency>();
 
