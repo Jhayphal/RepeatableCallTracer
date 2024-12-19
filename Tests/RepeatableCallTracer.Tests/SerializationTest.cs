@@ -124,10 +124,10 @@ public partial class SerializationTest
     {
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
-        CallTracerOptions options = new()
-        {
-            ThrowIfValueCannotBeDeserializedCorrectly = true
-        };
+        CallTracerOptions options = new(
+            ThrowIfHasUntrackedDependencies: false,
+            ThrowIfParametersDifferMethodSignature: false,
+            ThrowIfValueCannotBeDeserializedCorrectly: true);
 
         EmployeesProvider employeesProvider = new();
         EmployeesProviderTracer employeesProviderTracer = new(employeesProvider, options);
@@ -145,10 +145,10 @@ public partial class SerializationTest
     {
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
-        CallTracerOptions options = new()
-        {
-            ThrowIfValueCannotBeDeserializedCorrectly = true
-        };
+        CallTracerOptions options = new(
+            ThrowIfHasUntrackedDependencies: false,
+            ThrowIfParametersDifferMethodSignature: false,
+            ThrowIfValueCannotBeDeserializedCorrectly: true);
 
         EmployeesProvider employeesProvider = new();
         EmployeesProviderTracer employeesProviderTracer = new(employeesProvider, options);

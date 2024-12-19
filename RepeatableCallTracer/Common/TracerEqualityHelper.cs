@@ -1,8 +1,11 @@
-﻿namespace RepeatableCallTracer.Common
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace RepeatableCallTracer.Common
 {
     public static class TracerEqualityHelper
     {
-        public static bool SequenceEqual<TSource>(IEnumerable<TSource>? first, IEnumerable<TSource>? second)
+        public static bool SequenceEqual<TSource>(IEnumerable<TSource> first, IEnumerable<TSource> second)
         {
             if (first is null)
             {

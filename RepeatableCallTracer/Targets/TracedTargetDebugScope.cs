@@ -1,4 +1,8 @@
-﻿namespace RepeatableCallTracer.Targets
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace RepeatableCallTracer.Targets
 {
     internal sealed class TracedTargetDebugScope : ITracedTargetOperation
     {

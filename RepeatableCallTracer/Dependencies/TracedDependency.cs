@@ -1,23 +1,30 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 
 using RepeatableCallTracer.Common;
 
 namespace RepeatableCallTracer.Dependencies
 {
-    public abstract class TracedDependency<TDependency>(TDependency dependency, CallTracerOptions options)
-        : ITracedDependency where TDependency : notnull
+    public abstract class TracedDependency<TDependency> : ITracedDependency
     {
-        private readonly CallTracerSerializer serializer = new(options);
+        private readonly CallTracerSerializer serializer;
 
-        private CallTrace? trace;
+        private CallTrace trace;
         private int callCounter;
+
+        public TracedDependency(TDependency dependency, CallTracerOptions options)
+        {
+            serializer = new CallTracerSerializer(options);
+            Dependency = dependency;
+        }
 
         public bool IsDebuggerAttached { get; private set; }
 
-        public string AssemblyQualifiedName { get; } = typeof(TDependency).AssemblyQualifiedName!;
+        public string AssemblyQualifiedName { get; } = typeof(TDependency).AssemblyQualifiedName;
 
-        protected TDependency Dependency { get; } = dependency;
+        protected TDependency Dependency { get; }
 
         public void AttachDebugger(CallTrace trace)
         {
@@ -45,7 +52,7 @@ namespace RepeatableCallTracer.Dependencies
 
         public TResult GetResult<TResult>(Expression<Func<TResult>> expression)
         {
-            if (expression.Body is not MethodCallExpression call)
+            if (!(expression.Body is MethodCallExpression call))
             {
                 throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
             }
@@ -55,7 +62,7 @@ namespace RepeatableCallTracer.Dependencies
 
         private TResult GetResult<TResult>(MethodBase method)
         {
-            ArgumentNullException.ThrowIfNull(trace);
+            //ArgumentNullException.ThrowIfNull(trace);
 
             return trace.GetDependencyMethodResult<TResult>(this, method, ++callCounter);
         }
@@ -64,7 +71,7 @@ namespace RepeatableCallTracer.Dependencies
             Expression<Func<TResult>> expression,
             TResult methodResult) where TResult : IEquatable<TResult>
         {
-            if (expression.Body is not MethodCallExpression call)
+            if (!(expression.Body is MethodCallExpression call))
             {
                 throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
             }
@@ -77,7 +84,7 @@ namespace RepeatableCallTracer.Dependencies
             TResult methodResult,
             IEqualityComparer<TResult> equalityComparer)
         {
-            if (expression.Body is not MethodCallExpression call)
+            if (!(expression.Body is MethodCallExpression call))
             {
                 throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
             }
@@ -88,9 +95,9 @@ namespace RepeatableCallTracer.Dependencies
         public TResult SetResult<TResult>(
             Expression<Func<TResult>> expression,
             TResult methodResult,
-            Func<TResult?, TResult?, bool> equals)
+            Func<TResult, TResult, bool> equals)
         {
-            if (expression.Body is not MethodCallExpression call)
+            if (!(expression.Body is MethodCallExpression call))
             {
                 throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
             }
@@ -102,8 +109,8 @@ namespace RepeatableCallTracer.Dependencies
             MethodBase method,
             TResult methodResult) where TResult : IEquatable<TResult>
         {
-            ArgumentNullException.ThrowIfNull(trace);
-            ArgumentNullException.ThrowIfNull(serializer);
+            //ArgumentNullException.ThrowIfNull(trace);
+            //ArgumentNullException.ThrowIfNull(serializer);
 
             var methodResultJson = serializer.SerializeAndCheckDeserializationIfRequired(
                 methodResult,
@@ -119,8 +126,8 @@ namespace RepeatableCallTracer.Dependencies
             TResult methodResult,
             IEqualityComparer<TResult> equalityComparer)
         {
-            ArgumentNullException.ThrowIfNull(trace);
-            ArgumentNullException.ThrowIfNull(serializer);
+            //ArgumentNullException.ThrowIfNull(trace);
+            //ArgumentNullException.ThrowIfNull(serializer);
 
             var methodResultJson = serializer.SerializeAndCheckDeserializationIfRequired(
                 methodResult,
@@ -134,10 +141,10 @@ namespace RepeatableCallTracer.Dependencies
         private TResult SetResult<TResult>(
             MethodBase method,
             TResult methodResult,
-            Func<TResult?, TResult?, bool> equals)
+            Func<TResult, TResult, bool> equals)
         {
-            ArgumentNullException.ThrowIfNull(trace);
-            ArgumentNullException.ThrowIfNull(serializer);
+            //ArgumentNullException.ThrowIfNull(trace);
+            //ArgumentNullException.ThrowIfNull(serializer);
 
             var methodResultJson = serializer.SerializeAndCheckDeserializationIfRequired(
                 methodResult,

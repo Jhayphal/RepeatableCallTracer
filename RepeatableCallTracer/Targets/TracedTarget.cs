@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 using RepeatableCallTracer.Debuggers;
@@ -6,14 +8,24 @@ using RepeatableCallTracer.Dependencies;
 
 namespace RepeatableCallTracer.Targets
 {
-    public abstract class TracedTarget<TTarget>(
-        TTarget target,
-        ITracedTargetDependenciesProvider dependenciesProvider,
-        ICallTraceWriter traceWriter,
-        IDebugCallTraceProvider debugTraceProvider,
-        CallTracerOptions options)
+    public abstract class TracedTarget<TTarget>
     {
         private readonly Type targetType = typeof(TTarget);
+        private readonly CallTracerOptions options;
+
+        public TracedTarget(
+            TTarget target,
+            ITracedTargetDependenciesProvider dependenciesProvider,
+            ICallTraceWriter traceWriter,
+            IDebugCallTraceProvider debugTraceProvider,
+            CallTracerOptions options)
+        {
+            this.options = options;
+            Target = target;
+            DependenciesProvider = dependenciesProvider;
+            TraceWriter = traceWriter;
+            DebugTraceProvider = debugTraceProvider;
+        }
 
         public TracedTarget(
             TTarget target,
@@ -56,20 +68,20 @@ namespace RepeatableCallTracer.Targets
         {
         }
 
-        protected TTarget Target { get; } = target;
+        protected TTarget Target { get; }
 
-        protected ITracedTargetDependenciesProvider DependenciesProvider { get; } = dependenciesProvider;
+        protected ITracedTargetDependenciesProvider DependenciesProvider { get; }
 
-        protected ICallTraceWriter TraceWriter { get; } = traceWriter;
+        protected ICallTraceWriter TraceWriter { get; }
 
-        protected IDebugCallTraceProvider DebugTraceProvider { get; } = debugTraceProvider;
+        protected IDebugCallTraceProvider DebugTraceProvider { get; }
 
         private bool IsDebug(MethodBase method)
             => DebugTraceProvider.IsDebug(targetType, method);
 
         protected ITracedTargetOperation BeginOperation(Expression<Action> expression)
         {
-            if (expression.Body is not MethodCallExpression call)
+            if (!(expression.Body is MethodCallExpression call))
             {
                 throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
             }
@@ -79,7 +91,7 @@ namespace RepeatableCallTracer.Targets
 
         protected ITracedTargetOperation BeginOperation<TResult>(Expression<Func<TResult>> expression)
         {
-            if (expression.Body is not MethodCallExpression call)
+            if (!(expression.Body is MethodCallExpression call))
             {
                 throw new ArgumentException("The expression must contain only a method call.", nameof(expression));
             }
@@ -90,27 +102,21 @@ namespace RepeatableCallTracer.Targets
         private ITracedTargetOperation BeginOperation(MethodBase method)
             => IsDebug(method)
                 ? BeginDebug(method)
-                : BeginCall(method);
+                : (ITracedTargetOperation)BeginCall(method);
 
         private TracedTargetCallScope BeginCall(MethodBase method)
         {
             var methodSignature = method.ToString();
-            ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
+            //ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
 
             var expectedParameters = method
                 .GetParameters()
-                .ToDictionary(p => p.Name!, p => p.ParameterType);
+                .ToDictionary(p => p.Name, p => p.ParameterType);
 
             var assemblyVersion = targetType.Assembly.GetName().Version;
-            ArgumentNullException.ThrowIfNull(assemblyVersion);
+            //ArgumentNullException.ThrowIfNull(assemblyVersion);
 
-            var trace = new CallTrace
-            {
-                AssemblyVersion = assemblyVersion,
-                AssemblyQualifiedName = targetType.AssemblyQualifiedName!,
-                MethodSignature = methodSignature,
-                Created = DateTime.UtcNow
-            };
+            var trace = new CallTrace(assemblyVersion, targetType.AssemblyQualifiedName, methodSignature, DateTime.UtcNow);
 
             var dependencies = DependenciesProvider.RetrieveDependenciesAndValidateIfRequired(Target);
             

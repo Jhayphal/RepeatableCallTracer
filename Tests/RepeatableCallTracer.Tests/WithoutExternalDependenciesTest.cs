@@ -145,10 +145,10 @@ public partial class WithoutExternalDependenciesTest
     {
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
-        CallTracerOptions options = new()
-        {
-            ThrowIfParametersDifferMethodSignature = true
-        };
+        CallTracerOptions options = new(
+            ThrowIfHasUntrackedDependencies: false,
+            ThrowIfParametersDifferMethodSignature: true,
+            ThrowIfValueCannotBeDeserializedCorrectly: false);
 
         SomeBusinessLogic target = new();
         SomeBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);
@@ -161,10 +161,10 @@ public partial class WithoutExternalDependenciesTest
     {
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
-        CallTracerOptions options = new()
-        {
-            ThrowIfParametersDifferMethodSignature = false
-        };
+        CallTracerOptions options = new(
+            ThrowIfHasUntrackedDependencies: false,
+            ThrowIfParametersDifferMethodSignature: false,
+            ThrowIfValueCannotBeDeserializedCorrectly: false);
 
         SomeBusinessLogic target = new();
         SomeBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);

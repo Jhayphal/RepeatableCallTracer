@@ -1,33 +1,43 @@
-﻿using System.Reflection;
-using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace RepeatableCallTracer
 {
     [JsonObjectCreationHandling(JsonObjectCreationHandling.Populate)]
     public sealed class CallTrace
     {
-        public required Version AssemblyVersion { get; init; }
+        public CallTrace(Version assemblyVersion, string assemblyQualifiedName, string methodSignature, DateTime created)
+        {
+            AssemblyVersion = assemblyVersion;
+            AssemblyQualifiedName = assemblyQualifiedName;
+            MethodSignature = methodSignature;
+            Created = created;
+        }
 
-        public required string AssemblyQualifiedName { get; init; }
+        public Version AssemblyVersion { get; }
 
-        public required string MethodSignature { get; init; }
+        public string AssemblyQualifiedName { get; }
 
-        public required DateTime Created { get; init; }
+        public string MethodSignature { get; }
 
-        public Dictionary<string, string> MethodParameters { get; } = [];
+        public DateTime Created { get; }
+
+        public Dictionary<string, string> MethodParameters { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Dependency Key, Method, Call Id, Method Result.
         /// </summary>
-        public Dictionary<string, Dictionary<string, Dictionary<int, string>>> ProvidedData { get; } = [];
+        public Dictionary<string, Dictionary<string, Dictionary<int, string>>> ProvidedData { get; } = new Dictionary<string, Dictionary<string, Dictionary<int, string>>>();
 
         [JsonIgnore]
         internal string Key
             => AssemblyQualifiedName + MethodSignature + Created.ToString("O");
 
         public TParameter GetTargetMethodParameter<TParameter>(string parameterName)
-            => JsonSerializer.Deserialize<TParameter>(MethodParameters[parameterName])!;
+            => JsonSerializer.Deserialize<TParameter>(MethodParameters[parameterName]);
 
         public TResult GetDependencyMethodResult<TResult>(
             ITracedDependency dependency,
@@ -35,11 +45,11 @@ namespace RepeatableCallTracer
             int callId)
         {
             var methodSignature = method.ToString();
-            ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
+            //ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
 
             var content = ProvidedData[dependency.AssemblyQualifiedName][methodSignature][callId];
 
-            return JsonSerializer.Deserialize<TResult>(content)!;
+            return JsonSerializer.Deserialize<TResult>(content);
         }
 
         internal void SetDependencyMethodResult(
@@ -49,18 +59,18 @@ namespace RepeatableCallTracer
             string methodResultJson)
         {
             var methodSignature = method.ToString();
-            ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
+            //ArgumentException.ThrowIfNullOrWhiteSpace(methodSignature);
 
             if (!ProvidedData.TryGetValue(dependency.AssemblyQualifiedName, out var methods))
             {
-                methods = [];
+                methods = new Dictionary<string, Dictionary<int, string>>();
 
                 ProvidedData.Add(dependency.AssemblyQualifiedName, methods);
             }
 
             if (!methods.TryGetValue(methodSignature, out var calls))
             {
-                calls = [];
+                calls = new Dictionary<int, string>();
 
                 methods.Add(methodSignature, calls);
             }

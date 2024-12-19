@@ -1,12 +1,18 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 
 namespace RepeatableCallTracer.Common
 {
-    internal readonly struct CallTracerSerializer(CallTracerOptions options)
+    internal readonly struct CallTracerSerializer
     {
-        private readonly CallTracerOptions options = options;
+        private readonly CallTracerOptions options;
 
-        public string SerializeAndCheckDeserializationIfRequired<TValue>(TValue value, Func<TValue?, TValue?, bool> equals)
+        public CallTracerSerializer(CallTracerOptions options)
+        {
+            this.options = options;
+        }
+
+        public string SerializeAndCheckDeserializationIfRequired<TValue>(TValue value, Func<TValue, TValue, bool> equals)
         {
             var parameterJson = JsonSerializer.Serialize(value);
 

@@ -90,10 +90,10 @@ public partial class IndeterministicDependencyTest
     {
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
-        CallTracerOptions options = new()
-        {
-            ThrowIfHasUntrackedDependencies = true
-        };
+        CallTracerOptions options = new(
+            ThrowIfHasUntrackedDependencies: true,
+            ThrowIfParametersDifferMethodSignature: false,
+            ThrowIfValueCannotBeDeserializedCorrectly: false);
 
         RandomNumbersProvider numbersProvider = new();
 
@@ -108,10 +108,10 @@ public partial class IndeterministicDependencyTest
     {
         DebugCallTraceProvider debugCallTraceProvider = new();
         InMemoryCallTraceWriter callTraceWriter = new();
-        CallTracerOptions options = new()
-        {
-            ThrowIfHasUntrackedDependencies = false
-        };
+        CallTracerOptions options = new(
+            ThrowIfHasUntrackedDependencies: false,
+            ThrowIfParametersDifferMethodSignature: false,
+            ThrowIfValueCannotBeDeserializedCorrectly: false);
 
         RandomNumbersProvider numbersProvider = new();
 

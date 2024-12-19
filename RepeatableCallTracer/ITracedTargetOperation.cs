@@ -1,4 +1,7 @@
-﻿namespace RepeatableCallTracer
+﻿using System;
+using System.Collections.Generic;
+
+namespace RepeatableCallTracer
 {
     public interface ITracedTargetOperation : IDisposable
     {
@@ -6,6 +9,6 @@
 
         void SetParameter<TParameter>(string name, ref TParameter value, EqualityComparer<TParameter> equalityComparer);
 
-        void SetParameter<TParameter>(string name, ref TParameter value, Func<TParameter?, TParameter?, bool> equals);
+        void SetParameter<TParameter>(string name, ref TParameter value, Func<TParameter, TParameter, bool> equals);
     }
 }

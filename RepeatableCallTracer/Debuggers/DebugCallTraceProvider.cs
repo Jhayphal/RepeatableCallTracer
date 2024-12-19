@@ -1,16 +1,18 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace RepeatableCallTracer.Debuggers
 {
     public sealed class DebugCallTraceProvider : IDebugCallTraceProvider
     {
-        private readonly Dictionary<Type, Dictionary<string, CallTrace>> traces = [];
+        private readonly Dictionary<Type, Dictionary<string, CallTrace>> traces = new Dictionary<Type, Dictionary<string, CallTrace>>();
 
         public bool IsDebug(Type targetType, MethodBase method)
-            => traces.TryGetValue(targetType, out var calls) && calls.ContainsKey(method.ToString()!);
+            => traces.TryGetValue(targetType, out var calls) && calls.ContainsKey(method.ToString());
 
         public CallTrace GetTrace(Type targetType, MethodBase method)
-            => traces[targetType][method.ToString()!];
+            => traces[targetType][method.ToString()];
 
         public void EnableDebug(Type targetType, CallTrace trace)
         {
@@ -21,7 +23,7 @@ namespace RepeatableCallTracer.Debuggers
 
             if (!traces.TryGetValue(targetType, out var calls))
             {
-                calls = [];
+                calls = new Dictionary<string, CallTrace>();
 
                 traces[targetType] = calls;
             }
@@ -39,7 +41,7 @@ namespace RepeatableCallTracer.Debuggers
                 return false;
             }
 
-            return calls.Remove(method.ToString()!);
+            return calls.Remove(method.ToString());
         }
     }
 }
