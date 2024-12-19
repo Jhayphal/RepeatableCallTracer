@@ -1,4 +1,6 @@
-﻿namespace RepeatableCallTracer
+﻿using System.Collections.Generic;
+
+namespace RepeatableCallTracer
 {
     public interface ITracedTargetDependenciesProvider
     {

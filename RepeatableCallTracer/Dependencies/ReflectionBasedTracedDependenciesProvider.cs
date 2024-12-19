@@ -1,14 +1,24 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace RepeatableCallTracer.Dependencies
 {
-    public sealed class ReflectionBasedTracedDependenciesProvider(CallTracerOptions options) : ITracedTargetDependenciesProvider
+    public sealed class ReflectionBasedTracedDependenciesProvider : ITracedTargetDependenciesProvider
     {
-        private readonly CallTracerOptions options = options;
+        private readonly CallTracerOptions options;
+
+        public ReflectionBasedTracedDependenciesProvider(CallTracerOptions options)
+        {
+            this.options = options;
+        }
 
         public IEnumerable<ITracedDependency> RetrieveDependenciesAndValidateIfRequired<TTarget>(TTarget target)
         {
-            ArgumentNullException.ThrowIfNull(target);
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
             var result = new List<ITracedDependency>();
 

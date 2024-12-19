@@ -1,4 +1,8 @@
-﻿using RepeatableCallTracer.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using RepeatableCallTracer.Common;
 
 namespace RepeatableCallTracer.Targets
 {
@@ -12,7 +16,7 @@ namespace RepeatableCallTracer.Targets
 
         private readonly CallTracerSerializer serializer;
 
-        private readonly Dictionary<string, Type> actualParameters = [];
+        private readonly Dictionary<string, Type> actualParameters = new Dictionary<string, Type>();
 
         public TracedTargetCallScope(
             CallTrace trace,
@@ -26,7 +30,7 @@ namespace RepeatableCallTracer.Targets
             this.expectedParameters = expectedParameters;
             this.dependencies = dependencies;
             this.traceWriter = traceWriter;
-            serializer = new(options);
+            serializer = new CallTracerSerializer(options);
 
             foreach (var operation in dependencies)
             {
@@ -52,7 +56,7 @@ namespace RepeatableCallTracer.Targets
                 value,
                 EqualityComparer<TParameter>.Default.Equals);
 
-            actualParameters.TryAdd(name, typeof(TParameter));
+            actualParameters[name] = typeof(TParameter);
         }
 
         public void SetParameter<TParameter>(
@@ -64,19 +68,19 @@ namespace RepeatableCallTracer.Targets
                 value,
                 equalityComparer.Equals);
 
-            actualParameters.TryAdd(name, typeof(TParameter));
+            actualParameters[name] = typeof(TParameter);
         }
 
         public void SetParameter<TParameter>(
             string name,
             ref TParameter value,
-            Func<TParameter?, TParameter?, bool> equals)
+            Func<TParameter, TParameter, bool> equals)
         {
             trace.MethodParameters[name] = serializer.SerializeAndCheckDeserializationIfRequired(
                 value,
                 equals);
 
-            actualParameters.TryAdd(name, typeof(TParameter));
+            actualParameters[name] = typeof(TParameter);
         }
 
         private void CheckMethodParametersIfRequired()
@@ -86,12 +90,12 @@ namespace RepeatableCallTracer.Targets
                 return;
             }
 
-            HashSet<string> processedParameters = [];
+            var processedParameters = new HashSet<string>();
 
             foreach (var parameter in expectedParameters)
             {
                 var parameterName = parameter.Key;
-                if (parameterName is not null)
+                if (!(parameterName is null))
                 {
                     if (!actualParameters.TryGetValue(parameterName, out var parameterType))
                     {
