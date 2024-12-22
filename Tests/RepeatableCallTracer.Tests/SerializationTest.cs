@@ -106,16 +106,40 @@ public partial class SerializationTest
     {
         public int AverageAge()
         {
-            using var scope = BeginOperation(() => AverageAge());
-
-            return Target.AverageAge();
+            var scope = BeginOperation(() => AverageAge());
+            
+            try
+            {
+                return Target.AverageAge();
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
         }
 
         public int AverageSpeed()
         {
-            using var scope = BeginOperation(() => AverageSpeed());
+            var scope = BeginOperation(() => AverageSpeed());
 
-            return Target.AverageSpeed();
+            try
+            {
+                return Target.AverageSpeed();
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
         }
     }
 

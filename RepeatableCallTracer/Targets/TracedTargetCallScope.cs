@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using RepeatableCallTracer.Common;
@@ -13,6 +14,7 @@ namespace RepeatableCallTracer.Targets
         private readonly IReadOnlyDictionary<string, Type> expectedParameters;
         private readonly IEnumerable<ITracedDependency> dependencies;
         private readonly ICallTraceWriter traceWriter;
+        private readonly Stopwatch stopwatch;
 
         private readonly CallTracerSerializer serializer;
 
@@ -36,10 +38,17 @@ namespace RepeatableCallTracer.Targets
             {
                 operation.BeginOperation(trace);
             }
+
+            stopwatch = new Stopwatch();
+            stopwatch.Start();
         }
 
         public void Dispose()
         {
+            stopwatch.Stop();
+
+            trace.Elapsed = stopwatch.Elapsed;
+
             foreach (var operation in dependencies.Reverse())
             {
                 operation.EndOperation();
@@ -49,6 +58,12 @@ namespace RepeatableCallTracer.Targets
 
             traceWriter.Append(trace);
         }
+
+        public void SetError(string error)
+            => trace.Error = error;
+
+        public void SetError(Exception error)
+            => SetError(error.ToString());
 
         public void SetParameter<TParameter>(string name, ref TParameter value) where TParameter : IEquatable<TParameter>
         {

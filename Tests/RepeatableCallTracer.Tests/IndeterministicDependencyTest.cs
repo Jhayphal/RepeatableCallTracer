@@ -57,9 +57,21 @@ public partial class IndeterministicDependencyTest
     {
         public int Sum()
         {
-            using var scope = BeginOperation(() => Sum());
+            var scope = BeginOperation(() => Sum());
 
-            return Target.Sum();
+            try
+            {
+                return Target.Sum();
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
         }
     }
 

@@ -32,12 +32,24 @@ public partial class AsyncTargetMethodTest
         [MethodImpl(MethodImplOptions.NoInlining)]
         public async Task<int> CalculateAsync(int a, int b)
         {
-            using var scope = BeginOperation(() => CalculateAsync(a, b));
+            var scope = BeginOperation(() => CalculateAsync(a, b));
 
-            scope.SetParameter(nameof(a), ref a);
-            scope.SetParameter(nameof(b), ref b);
+            try
+            {
+                scope.SetParameter(nameof(a), ref a);
+                scope.SetParameter(nameof(b), ref b);
 
-            return await Target.CalculateAsync(a, b);
+                return await Target.CalculateAsync(a, b);
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
         }
     }
 

@@ -5,6 +5,10 @@ namespace RepeatableCallTracer
 {
     public interface ITracedTargetOperation : IDisposable
     {
+        void SetError(string error);
+
+        void SetError(Exception error);
+
         void SetParameter<TParameter>(string name, ref TParameter value) where TParameter : IEquatable<TParameter>;
 
         void SetParameter<TParameter>(string name, ref TParameter value, EqualityComparer<TParameter> equalityComparer);

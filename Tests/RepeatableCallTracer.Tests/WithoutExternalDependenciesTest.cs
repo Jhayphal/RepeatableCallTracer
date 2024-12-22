@@ -36,31 +36,67 @@ public partial class WithoutExternalDependenciesTest
     {
         public int Calculate(int a, int b)
         {
-            using var scope = BeginOperation(() => Calculate(a, b));
+            var scope = BeginOperation(() => Calculate(a, b));
 
-            scope.SetParameter(nameof(a), ref a);
-            scope.SetParameter(nameof(b), ref b);
+            try
+            {
+                scope.SetParameter(nameof(a), ref a);
+                scope.SetParameter(nameof(b), ref b);
 
-            return Target.Calculate(a, b);
+                return Target.Calculate(a, b);
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
         }
 
         public int Get(int x)
         {
-            using var scope = BeginOperation(() => Get(x));
+            var scope = BeginOperation(() => Get(x));
 
-            scope.SetParameter(nameof(x), ref x);
+            try
+            {
+                scope.SetParameter(nameof(x), ref x);
 
-            return Target.Get(x);
+                return Target.Get(x);
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
         }
 
         public int Sub(int a, int b)
         {
-            using var scope = BeginOperation(() => Sub(a, b));
+            var scope = BeginOperation(() => Sub(a, b));
 
-            scope.SetParameter(nameof(a), ref a);
-            // scope.SetParameter(nameof(b), ref b);
+            try
+            {
+                scope.SetParameter(nameof(a), ref a);
+                // scope.SetParameter(nameof(b), ref b);
 
-            return Target.Sub(a, b);
+                return Target.Sub(a, b);
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
         }
     }
 
@@ -154,6 +190,7 @@ public partial class WithoutExternalDependenciesTest
         SomeBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider, options);
 
         Assert.Throws<InvalidProgramException>(() => tracer.Sub(0, 0));
+        Assert.Empty(callTraceWriter.Traces);
     }
 
     [Fact]
