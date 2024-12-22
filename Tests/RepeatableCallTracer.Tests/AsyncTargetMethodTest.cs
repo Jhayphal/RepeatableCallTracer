@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-using RepeatableCallTracer.Debuggers;
+﻿using RepeatableCallTracer.Debuggers;
 using RepeatableCallTracer.Targets;
 using RepeatableCallTracer.Tests.Infrastructure;
 
@@ -11,6 +9,8 @@ public partial class AsyncTargetMethodTest
     internal interface ISomeBusinessLogic
     {
         Task<int> CalculateAsync(int a, int b);
+
+        Task<int> PowAsync(int x);
     }
 
     internal sealed class SomeBusinessLogic : ISomeBusinessLogic
@@ -21,6 +21,11 @@ public partial class AsyncTargetMethodTest
 
             return a + b;
         }
+
+        public Task<int> PowAsync(int x)
+        {
+            throw new DivideByZeroException();
+        }
     }
 
     internal sealed class SomeBusinessLogicTracer(
@@ -29,15 +34,47 @@ public partial class AsyncTargetMethodTest
         IDebugCallTraceProvider debugCallTraceProvider)
         : TracedTarget<ISomeBusinessLogic>(target, callTraceWriter, debugCallTraceProvider, CallTracerOptions.Strict), ISomeBusinessLogic
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public async Task<int> CalculateAsync(int a, int b)
         {
-            using var scope = BeginOperation(() => CalculateAsync(a, b));
+            var scope = BeginOperation(() => CalculateAsync(a, b));
 
-            scope.SetParameter(nameof(a), ref a);
-            scope.SetParameter(nameof(b), ref b);
+            try
+            {
+                scope.SetParameter(nameof(a), ref a);
+                scope.SetParameter(nameof(b), ref b);
 
-            return await Target.CalculateAsync(a, b);
+                return await Target.CalculateAsync(a, b);
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
+        }
+
+        public async Task<int> PowAsync(int x)
+        {
+            var scope = BeginOperation(() => PowAsync(x));
+
+            try
+            {
+                scope.SetParameter(nameof(x), ref x);
+
+                return await Target.PowAsync(x);
+            }
+            catch (Exception ex)
+            {
+                scope.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                scope.Dispose();
+            }
         }
     }
 
@@ -67,5 +104,25 @@ public partial class AsyncTargetMethodTest
 
         var actualB = trace.GetTargetMethodParameter<int>("b");
         Assert.Equal(actualB, expectedB);
+
+        Assert.True(trace.Elapsed > TimeSpan.Zero, "Time was not recorded.");
+    }
+
+    [Fact]
+    public async Task Test_AsyncMethod_ErrorCapturing_Failed()
+    {
+        DebugCallTraceProvider debugCallTraceProvider = new();
+        InMemoryCallTraceWriter callTraceWriter = new();
+
+        SomeBusinessLogic target = new();
+        SomeBusinessLogicTracer tracer = new(target, callTraceWriter, debugCallTraceProvider);
+
+        var expectedX = 1;
+
+        await Assert.ThrowsAsync<DivideByZeroException>(async () => await tracer.PowAsync(expectedX));
+        Assert.Single(callTraceWriter.Traces);
+
+        var trace = callTraceWriter.Traces.First!.Value;
+        Assert.False(string.IsNullOrEmpty(trace.Error), "Error was not captured.");
     }
 }

@@ -30,6 +30,16 @@ namespace RepeatableCallTracer.Targets
             }
         }
 
+        public void SetError(string error)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetParameter<TParameter>(string name, ref TParameter value) where TParameter : IEquatable<TParameter>
             => SetParameter(name, ref value, EqualityComparer<TParameter>.Default.Equals);
 

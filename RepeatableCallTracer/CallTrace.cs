@@ -25,6 +25,14 @@ namespace RepeatableCallTracer
 
         public DateTime Created { get; }
 
+        public TimeSpan Elapsed { get; set; }
+
+        public string Error { get; internal set; }
+
+        [JsonIgnore]
+        public bool Failed
+            => string.IsNullOrWhiteSpace(Error);
+
         public Dictionary<string, string> MethodParameters { get; } = new Dictionary<string, string>();
 
         /// <summary>
