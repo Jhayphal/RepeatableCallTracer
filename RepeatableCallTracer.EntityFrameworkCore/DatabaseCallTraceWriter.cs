@@ -1,22 +1,13 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace RepeatableCallTracer.EntityFrameworkCore
 {
-    public interface ICallTraceReader
-    {
-        CallTrace GetRequiredTrace<TTarget>(DateTime time);
-
-        CallTrace? GetNearestTraceUpTo<TTarget>(DateTime time);
-
-        IEnumerable<CallTrace> GetTraces<TTarget>();
-
-        IEnumerable<CallTrace> GetTraces(Version assemblyVersion);
-    }
-
-    public sealed class DatabaseCallTraceWriter(IDbContextFactory<CallTracerDbContext> factory) : ICallTraceReader, ICallTraceWriter
+    public sealed class DatabaseCallTraceWriter(IDbContextFactory<CallTracerDbContext> factory)
+        : ICallTraceReader, ICallTraceWriter
     {
         private readonly IDbContextFactory<CallTracerDbContext> factory = factory;
 
@@ -84,7 +75,9 @@ namespace RepeatableCallTracer.EntityFrameworkCore
             
             var trace = context.Traces
                 .OrderByDescending(t => t.Created)
-                .Where(t => t.AssemblyVersion == version && t.AssemblyQualifiedName == name && t.Created <= time)
+                .Where(t => t.AssemblyVersion == version
+                    && t.AssemblyQualifiedName == name
+                    && t.Created <= time)
                 .FirstOrDefault();
 
             if (trace is null)
@@ -96,7 +89,39 @@ namespace RepeatableCallTracer.EntityFrameworkCore
                 assemblyVersion: Version.Parse(trace.AssemblyVersion),
                 assemblyQualifiedName: trace.AssemblyQualifiedName,
                 methodSignature: trace.MethodSignature,
-                created: trace.Created);
+                created: trace.Created)
+            {
+                Elapsed = trace.Elapsed
+            };
+
+            var methodParameters = context.Parameters
+                .Where(p => p.TargetMethodCallId == trace.Id)
+                .ToList();
+
+            foreach (var @param in methodParameters)
+            {
+                result.MethodParameters.Add(@param.Name, @param.Value);
+            }
+
+            var dependencies = context.Dependencies
+                .Where(d => d.TargetMethodCallId == trace.Id)
+                .ToList();
+
+            foreach (var dependency in dependencies)
+            {
+                var calls = context.DependencyMethodCalls
+                    .Where(c => c.DependencyMethodId == dependency.Id)
+                    .ToDictionary(c => c.CallId, c => c.MethodResult);
+
+                if (!result.ProvidedData.TryGetValue(dependency.DependencyKey, out var methods))
+                {
+                    methods = [];
+
+                    result.ProvidedData.Add(dependency.DependencyKey, methods);
+                }
+
+                methods.Add(dependency.MethodSignature, calls);
+            }
 
             return result;
         }
