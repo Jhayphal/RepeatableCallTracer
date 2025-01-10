@@ -1,15 +1,102 @@
-﻿using System.Diagnostics;
-using System.Linq;
-using System.Text.Json;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace RepeatableCallTracer.EntityFrameworkCore
 {
-    public sealed class DatabaseCallTraceWriter(IDbContextFactory<CallTracerDbContext> factory)
+    public sealed class CallTracesStorage(IDbContextFactory<CallTracerDbContext> factory)
         : ICallTraceReader, ICallTraceWriter
     {
         private readonly IDbContextFactory<CallTracerDbContext> factory = factory;
+
+        public CallTrace? GetNearestTraceUpTo<TTarget>(DateTime time)
+        {
+            using var context = factory.CreateDbContext();
+
+            var targetType = typeof(TTarget);
+            var version = targetType.Assembly.GetName().Version!.ToString();
+            var name = targetType.AssemblyQualifiedName;
+            
+            var trace = context.Traces
+                .OrderByDescending(t => t.Created)
+                .Where(t => t.AssemblyVersion == version
+                    && t.AssemblyQualifiedName == name
+                    && t.Created <= time)
+                .FirstOrDefault();
+
+            return trace is null
+                ? null
+                : ReadTrace(context, trace);
+        }
+
+        public CallTrace GetRequiredTrace<TTarget>(DateTime time)
+        {
+            using var context = factory.CreateDbContext();
+
+            var targetType = typeof(TTarget);
+            var version = targetType.Assembly.GetName().Version!.ToString();
+            var name = targetType.AssemblyQualifiedName;
+
+            var trace = context.Traces
+                .OrderByDescending(t => t.Created)
+                .Where(t => t.AssemblyVersion == version
+                    && t.AssemblyQualifiedName == name
+                    && t.Created == time)
+                .FirstOrDefault();
+
+            return trace is null
+                ? throw new ArgumentOutOfRangeException(nameof(time))
+                : ReadTrace(context, trace);
+        }
+
+        public IEnumerable<CallTrace> GetTraces<TTarget>()
+        {
+            using var context = factory.CreateDbContext();
+
+            var targetType = typeof(TTarget);
+            var version = targetType.Assembly.GetName().Version!.ToString();
+            var name = targetType.AssemblyQualifiedName;
+
+            var traces = context.Traces
+                .OrderByDescending(t => t.Created)
+                .Where(t => t.AssemblyVersion == version
+                    && t.AssemblyQualifiedName == name)
+                .ToList();
+
+            List<CallTrace> result = [];
+
+            foreach (var item in traces)
+            {
+                var trace = ReadTrace(context, item)
+                    ?? throw new InvalidDataException();
+
+                result.Add(trace);
+            }
+
+            return result;
+        }
+
+        public IEnumerable<CallTrace> GetTraces(Version assemblyVersion)
+        {
+            using var context = factory.CreateDbContext();
+
+            var version = assemblyVersion.ToString();
+
+            var traces = context.Traces
+                .OrderByDescending(t => t.Created)
+                .Where(t => t.AssemblyVersion == version)
+                .ToList();
+
+            List<CallTrace> result = [];
+
+            foreach (var item in traces)
+            {
+                var trace = ReadTrace(context, item)
+                    ?? throw new InvalidDataException();
+
+                result.Add(trace);
+            }
+
+            return result;
+        }
 
         public void Append(CallTrace trace)
         {
@@ -65,26 +152,10 @@ namespace RepeatableCallTracer.EntityFrameworkCore
             context.SaveChanges();
         }
 
-        public CallTrace? GetNearestTraceUpTo<TTarget>(DateTime time)
+        private static CallTrace ReadTrace(
+            CallTracerDbContext context,
+            TargetMethodCall trace)
         {
-            using var context = factory.CreateDbContext();
-
-            var targetType = typeof(TTarget);
-            var version = targetType.Assembly.GetName().Version!.ToString();
-            var name = targetType.AssemblyQualifiedName;
-            
-            var trace = context.Traces
-                .OrderByDescending(t => t.Created)
-                .Where(t => t.AssemblyVersion == version
-                    && t.AssemblyQualifiedName == name
-                    && t.Created <= time)
-                .FirstOrDefault();
-
-            if (trace is null)
-            {
-                return null;
-            }
-
             var result = new CallTrace(
                 assemblyVersion: Version.Parse(trace.AssemblyVersion),
                 assemblyQualifiedName: trace.AssemblyQualifiedName,
@@ -124,21 +195,6 @@ namespace RepeatableCallTracer.EntityFrameworkCore
             }
 
             return result;
-        }
-
-        public CallTrace GetRequiredTrace<TTarget>(DateTime time)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<CallTrace> GetTraces<TTarget>()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<CallTrace> GetTraces(Version assemblyVersion)
-        {
-            throw new NotImplementedException();
         }
     }
 }
