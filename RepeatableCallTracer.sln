@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepeatableCallTracer.Tests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepeatableCallTracer.EntityFrameworkCore", "RepeatableCallTracer.EntityFrameworkCore\RepeatableCallTracer.EntityFrameworkCore.csproj", "{127CB1AD-D2AB-40D3-ACE9-ADD3E68B8F70}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepeatableCallTracer.EntityFrameworkCore.Tests", "Tests\RepeatableCallTracer.EntityFrameworkCore.Tests\RepeatableCallTracer.EntityFrameworkCore.Tests.csproj", "{83DD1FBC-A931-40AB-A0BC-D15136B74F34}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,11 +31,16 @@ Global
 		{127CB1AD-D2AB-40D3-ACE9-ADD3E68B8F70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{127CB1AD-D2AB-40D3-ACE9-ADD3E68B8F70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{127CB1AD-D2AB-40D3-ACE9-ADD3E68B8F70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83DD1FBC-A931-40AB-A0BC-D15136B74F34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83DD1FBC-A931-40AB-A0BC-D15136B74F34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83DD1FBC-A931-40AB-A0BC-D15136B74F34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83DD1FBC-A931-40AB-A0BC-D15136B74F34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5A58962C-B7AD-43D4-9041-AA4CD10C7943} = {4DFC2C10-4BA3-4879-8E88-CBB37BC31C3C}
+		{83DD1FBC-A931-40AB-A0BC-D15136B74F34} = {4DFC2C10-4BA3-4879-8E88-CBB37BC31C3C}
 	EndGlobalSection
 EndGlobal

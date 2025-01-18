@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
-    <RootNamespace>RepeatableCallTracer.Tests</RootNamespace>
+    <RootNamespace>RepeatableCallTracer.EntityFrameworkCore.Tests</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
     <!--
     To enable the Microsoft Testing Platform 'dotnet test' experience, add property:
@@ -27,13 +27,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="xunit.v3" Version="1.0.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RepeatableCallTracer\RepeatableCallTracer.csproj" />
+    <ProjectReference Include="..\..\RepeatableCallTracer.EntityFrameworkCore\RepeatableCallTracer.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>
